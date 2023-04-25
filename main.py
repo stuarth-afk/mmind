@@ -24,14 +24,14 @@ api = API(access_token=access_token)
 currency_pairs = [
     "EUR_USD",
     "AUD_USD",
-    "USD_JPY",
+    #"USD_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
     "GBP_USD",
     #"USD_CHF",
     #"USD_CAD",
     #"NZD_USD",
     #"EUR_GBP",
-    #"EUR_JPY",
-    #"GBP_JPY",
+    #"EUR_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
+    #"GBP_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
 ]
 
 # Create global flag variables for each currency pair
@@ -61,11 +61,11 @@ class TrendingStrategy:
         # Get the current market price for the currency pair
         #market_price = data['price'].iloc[-1]
         market_price = float(data['candles'][-1]['mid']['c'])
-        # Print the current market price
+        #Print the current market price
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        return "BUY"
+        #return "SELL"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma5 > ma20 > ma50 and market_price > ma5:
@@ -144,8 +144,8 @@ def get_historical_data(pair, granularity="M1", count=NUM_POINTS):
         api.request(request)
         #print (request.response)
         return request.response
-    except:
-        print("Fetch error occurred in get_historical_data")
+    except Exception as e:
+        print(f"Fetch Error Occurred in get_historical_data: {e}")
     return
 
 # Function to process data and calculate moving averages
@@ -177,7 +177,7 @@ def process_data_and_calculate_moving_averages(candles):
     ma20 = round(float(data['MA20'].iloc[-1]),4)
     ma50 = round(float(data['MA50'].iloc[-1]),4)
     ma100 = round(float(data['MA100'].iloc[-1]),4)
-    
+
     return data
 
 # Function to analyze market conditions and select the best trading strategy
@@ -195,7 +195,7 @@ def select_strategy(pair, pair_data):
         print("Default Trending Strategy Selected")
         return "trending"
 
-# Add new functions to get account value and execute trades
+# Get account value and other details
 def get_account_value():
     try:
         request = accounts.AccountDetails(account_id)
@@ -218,7 +218,7 @@ def execute_trade(pair, decision):
 
     # If the expiry flag is set, then do not execute this function
     if globals()[pair + "_flag"] == True:
-        print("Expiry Flag True - ORDER CAN NOT BE PLACED UNTIL:",globals()[tagname_expiry_time])
+        print("Expiry Flag True - Order can not be placed until:",globals()[tagname_expiry_time])
         return
 
     #Define Stop Loss Distance
@@ -240,14 +240,14 @@ def execute_trade(pair, decision):
 
     #set the price that a buy/sell will occur
     if decision == "BUY":
-         opportunity_price = float(ticker)  - buy_below_distance # set to x pips below current price for a BUY
+         opportunity_price = round(float(ticker)  - buy_below_distance,5) # set to x pips below current price for a BUY
     elif decision == "SELL":
-        opportunity_price = float(ticker)  + buy_above_distance # set to x pips above current price for a SELL
+        opportunity_price = round(float(ticker)  + buy_above_distance,5) # set to x pips above current price for a SELL
     else :
         opportunity_price = 0 # set to 0 for NO ACTION
 
     # Set expiry time in UTC
-    expiry_time_utc = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+    expiry_time_utc = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
 
     # Convert expiry time to AEST timezone
     tz_aest = pytz.timezone('Australia/Sydney')
@@ -259,23 +259,22 @@ def execute_trade(pair, decision):
 
     # Once the trade is executed, set the corresponding flag to True
     globals()[tagname_expiry_flag] = True
-    print("Expiry Flag:", globals()[tagname_expiry_flag])
+    #print("Expiry Flag:", globals()[tagname_expiry_flag])
 
     # Once the trade is executed, set the corresponding flag_expiry_time
     globals()[tagname_expiry_time] = expiry_time_aest
     #flag_expiry_time = globals()[pair + "_flag_expiry_time"]
-    print("DEBUG 8 Flag Expiry Time:",globals()[tagname_expiry_time])
+    #print("DEBUG 8 Flag Expiry Time:",globals()[tagname_expiry_time])
 
     # Define a function to set the flag back to False when the expiry time is reached
     def set_flag_false():
         globals()[tagname_expiry_flag] = False
         globals()[tagname_expiry_time]= 0
-    
+
     # Schedule the set_flag_false function to be called after the expiry time has passed
     timer = threading.Timer((expiry_time_utc - datetime.datetime.utcnow()).total_seconds(), set_flag_false)
     timer.start()
-    
-    
+
     if trade_quantity > 0:
         order_data = {
             "order": {
@@ -286,7 +285,7 @@ def execute_trade(pair, decision):
                 "type": "LIMIT",
                 "gtdTime": expiry_time_str,
                 "positionFill": "DEFAULT",
-                "trailingStopLossOnFill": {      #Pat uses  stop loss on fill with MARKET, Pat then updates the stop loss using the "trade" endpoint. Not the "order" endpoint. Pat trades 1 minute candles, and will bump up the stop loss to be 2 pips below the lowest candle in the last 15 minutes.
+                "trailingStopLossOnFill": {      #Pat uses stop loss on fill with MARKET, then updates the stop loss using the "trade" endpoint. Not the "order" endpoint. Pat trades 1 minute candles, and will bump up the stop loss to be 2 pips below the lowest candle in the last 15 minutes.
                     "distance": str(stop_loss_distance),
                     "timeInForce": "GTC",
                     "type": "TRAILING_STOP_LOSS"
@@ -295,14 +294,15 @@ def execute_trade(pair, decision):
         }
 
         try:
-            time.sleep(10) # Pause for 2 seconds due to orders failing to Oanda on first scan
+            #time.sleep(10) # Pause not required
             #print(f"DEBUG 4 {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")
             request = orders.OrderCreate(account_id, data=order_data)
             api.request(request)
             response = request.response
             print(f"{decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} opportunity price")
-        except:
-            print("Request Order Error Occurred in execute_trade")
+        except Exception as e:
+            print(f"ORDER ERROR: {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")           
+            print(f"Request Order Error Occurred in execute_trade: {e}")
     else:
         print(f"Insufficient account value to place {decision} order for {pair}")
 
@@ -310,10 +310,10 @@ def execute_trade(pair, decision):
 def main():
     for pair in currency_pairs:
         #DEBUG 6 
-        print("EUR_USD Expiry Flag:",EUR_USD_flag)
-        print("EUR_USD Expiry Time:",EUR_USD_flag_expiry_time)
-        print("AUD_USD Expiry Flag:",AUD_USD_flag)
-        print("AUD_USD Expiry Time:",AUD_USD_flag_expiry_time)
+        #print("EUR_USD Expiry Flag:",EUR_USD_flag)
+        #print("EUR_USD Expiry Time:",EUR_USD_flag_expiry_time)
+        #print("AUD_USD Expiry Flag:",AUD_USD_flag)
+        #print("AUD_USD Expiry Time:",AUD_USD_flag_expiry_time)
 
         pair_data = get_historical_data(pair)
         
@@ -325,7 +325,7 @@ def main():
         #print(moving_avg_data)
         
         # Print the most recent moving average values
-        print("\nCurrent Price: ", current_price)
+        print("\n{pair} Current Price: ", current_price)
         print("Moving Averages")
         print("MA5  :", ma5)
         print("MA10 :", ma10)
