@@ -26,10 +26,10 @@ currency_pairs = [
     "AUD_USD",
     #"USD_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
     "GBP_USD",
-    #"USD_CHF",
-    #"USD_CAD",
-    #"NZD_USD",
-    #"EUR_GBP",
+    "USD_CHF",
+    "USD_CAD",
+    "NZD_USD",
+    "EUR_GBP",
     #"EUR_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
     #"GBP_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
 ]
@@ -135,7 +135,6 @@ class RegulatoryStrategy:
         print("RegulatoryStrategy.decide executed")
         return "BUY"
 
-
 # Function to fetch historical data
 def get_historical_data(pair, granularity="M1", count=NUM_POINTS):
     try:
@@ -192,7 +191,7 @@ def select_strategy(pair, pair_data):
         #print("AUD_USD Market to apply a Trending Strategy")
         return "trending"
     else :
-        print("Default Trending Strategy Selected")
+        #print("Default Trending Strategy Selected")
         return "trending"
 
 # Get account value and other details
@@ -285,7 +284,15 @@ def execute_trade(pair, decision):
                 "type": "LIMIT",
                 "gtdTime": expiry_time_str,
                 "positionFill": "DEFAULT",
-                "trailingStopLossOnFill": {      #Pat uses stop loss on fill with MARKET, then updates the stop loss using the "trade" endpoint. Not the "order" endpoint. Pat trades 1 minute candles, and will bump up the stop loss to be 2 pips below the lowest candle in the last 15 minutes.
+                #"trailingStopLossOnFill": {      #Pat uses stop loss on fill with MARKET, then updates the stop loss using the "trade" endpoint. Not the "order" endpoint. Pat trades 1 minute candles, and will bump up the stop loss to be 2 pips below the lowest candle in the last 15 minutes.
+                    "distance": str(stop_loss_distance),
+                #    "timeInForce": "GTC",
+                #    "type": "TRAILING_STOP_LOSS"
+                "takeProfitOnFill": {          # Add this block to set a take profit condition
+                     "price": str(opportunity_price + 0.0002) if decision == "BUY" else str(opportunity_price - 0.0002),
+                     "timeInForce": "GTC" 
+                },
+                "trailingStopLossOnFill": {
                     "distance": str(stop_loss_distance),
                     "timeInForce": "GTC",
                     "type": "TRAILING_STOP_LOSS"
@@ -323,9 +330,12 @@ def main():
 
         # Print the DataFrame with the calculated moving averages
         #print(moving_avg_data)
-        
-        # Print the most recent moving average values
-        print("\n{pair} Current Price: ", current_price)
+
+        strategy = select_strategy(pair, pair_data)
+
+        # Print Values to Command Line
+        print(f"\n{pair} Current Price:", current_price)
+        print(f"Strategy:{strategy}")
         print("Moving Averages")
         print("MA5  :", ma5)
         print("MA10 :", ma10)
@@ -333,8 +343,8 @@ def main():
         print("MA50 :", ma50)
         print("MA100:", ma100)
 
-        strategy = select_strategy(pair, pair_data)
-        print(f"Selected strategy for {pair}: {strategy}")
+        #strategy = select_strategy(pair, pair_data)
+        #print(f"Selected strategy for {pair}: {strategy}")
 
         # Initialize strategy objects
         trending_strategy = TrendingStrategy()
