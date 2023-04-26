@@ -222,10 +222,11 @@ def execute_trade(pair, decision):
 
     #Define Stop Loss Distance
     stop_loss_distance = 0.0005 # set this to desired number of pips
+    take_profit_distance = 0.00025 # set this to desired number of pips 
 
     #Define the opportunity to buy window
-    buy_below_distance = 0.0010 # set this to desired number of pips below current price for a BUY trade
-    buy_above_distance = 0.0010 # set this to desired number of pips above current price for a SELL trade
+    buy_below_distance = 0.0000 #0.0010 set this to desired number of pips below current price for a BUY trade
+    buy_above_distance = 0.0000 #0.0010 set this to desired number of pips above current price for a SELL trade
     
     # Calculate the trade size based on 0.5% of the total account value * margin 50:1
     account_value = get_account_value()
@@ -289,7 +290,7 @@ def execute_trade(pair, decision):
                 #    "timeInForce": "GTC",
                 #    "type": "TRAILING_STOP_LOSS"
                 "takeProfitOnFill": {          # Add this block to set a take profit condition
-                     "price": str(opportunity_price + 0.0002) if decision == "BUY" else str(opportunity_price - 0.0002),
+                     "price": str(round((opportunity_price + take_profit_distance),5)) if decision == "BUY" else str(round((opportunity_price - take_profit_distance),5)),
                      "timeInForce": "GTC" 
                 },
                 "trailingStopLossOnFill": {

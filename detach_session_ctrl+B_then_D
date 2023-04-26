@@ -1,0 +1,2 @@
+#Detach the tmux session by pressing Ctrl + B, then D.
+#To reattach, use: tmux attach-session -t mysession
