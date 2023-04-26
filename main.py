@@ -317,7 +317,7 @@ def execute_trade(pair, decision):
 
 def example_function(gen_parameter1, default_currency_settings, currency_pairs):
     # Print a single general value 
-    print("Single gen_parameter1:",gen_parameter1)     
+    print("Single gen_parameter1:",general_settings['gen_parameter1'])     
 
     # Print a single value from the default_currency_settings dictionary
     print("OrderType:", default_currency_settings['OrderType'])
@@ -332,6 +332,7 @@ def example_function(gen_parameter1, default_currency_settings, currency_pairs):
         print(f"{currency_pair} pair:", settings['pair'])
 
     # Print All Values from Dictionaries
+    print("\nAll General Settings:", general_settings)
     print("\nAll Default currency settings:", default_currency_settings)
     print("All Currency Pair Data:", currency_pairs)
 
@@ -418,19 +419,21 @@ while True:
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    # General settings
-    access_token = config.get('general', 'access_token')
-    account_id = config.get('general', 'account_id')
-    account_margin = float(config.get('general', 'account_margin'))
-    trade_size = float(config.get('general', 'trade_size'))
-    candle_size = config.get('general', 'candle_size')
-    num_candles_to_fetch = float(config.get('general', 'num_candles_to_fetch'))
-    gen_parameter1 = float(config.get('general', 'gen_parameter1'))
-    gen_parameter2 = float(config.get('general', 'gen_parameter2'))
-    gen_parameter3 = float(config.get('general', 'gen_parameter3'))
-    gen_parameter4 = float(config.get('general', 'gen_parameter4'))
-    gen_parameter5 = float(config.get('general', 'gen_parameter5'))
-    gen_parameter6 = float(config.get('general', 'gen_parameter6'))
+    # General settings as a dictionary
+    general_settings = {
+        'access_token': config.get('general', 'access_token'),
+        'account_id': config.get('general', 'account_id'),
+        'account_margin': float(config.get('general', 'account_margin')),
+        'trade_size': float(config.get('general', 'trade_size')),
+        'candle_size': config.get('general', 'candle_size'),
+        'num_candles_to_fetch': float(config.get('general', 'num_candles_to_fetch')),
+        'gen_parameter1': float(config.get('general', 'gen_parameter1')),
+        'gen_parameter2': float(config.get('general', 'gen_parameter2')),
+        'gen_parameter3': float(config.get('general', 'gen_parameter3')),
+        'gen_parameter4': float(config.get('general', 'gen_parameter4')),
+        'gen_parameter5': float(config.get('general', 'gen_parameter5')),
+        'gen_parameter6': float(config.get('general', 'gen_parameter6')),
+}
     
     
     # Default currency settings
@@ -471,9 +474,10 @@ while True:
     #print("Current Settings: ",setting1, setting2, db_host, db_port, db_user, db_password)
 
     # Call the example function with the dictionaries as arguments
-    example_function(gen_parameter1, default_currency_settings, currency_pairs)
-
-    #main() # Call main function
+    #example_function(general_settings, default_currency_settings, currency_pairs)
+    
+    #Call Main Function
+    main()
 
     time.sleep(30) # Pause the while loop for 30 seconds
 
