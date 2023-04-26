@@ -1,6 +1,7 @@
 #Money Mind
 # stuarth-afk
 # Oanda trading program
+# test1
 
 import oandapyV20
 from oandapyV20 import API
