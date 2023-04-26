@@ -16,55 +16,8 @@ import pytz
 import numpy as np
 import configparser
 
-# Read config.ini file
-#config = configparser.ConfigParser()
-#config.read('config.ini')
-
-# General settings as a dictionary
-#firstscan_settings = {
-#        'access_token': config.get('general', 'access_token'),
-#        'account_id': config.get('general', 'account_id'),
-        #'account_margin': float(config.get('general', 'account_margin')),
-        #'trade_size': float(config.get('general', 'trade_size')),
-        #'candle_size': config.get('general', 'candle_size'),
-        #'num_candles_to_fetch': int(config.get('general', 'num_candles_to_fetch')),
-        #'gen_parameter1': float(config.get('general', 'gen_parameter1')),
-        #'gen_parameter2': float(config.get('general', 'gen_parameter2')),
-        #'gen_parameter3': float(config.get('general', 'gen_parameter3')),
-        #'gen_parameter4': float(config.get('general', 'gen_parameter4')),
-        #'gen_parameter5': float(config.get('general', 'gen_parameter5')),
-        #'gen_parameter6': float(config.get('general', 'gen_parameter6')),
-#}
-
-
-
-
-# Oanda API access token and account ID
-#access_token = "dae33bc19c79e146091e2e0030757964-0464b9a0b9f2944493bf47a8645c14c0"
-#account_id = "101-011-25242779-001"
-#access_token = firstscan_settings['access_token']
-#access_id = firstscan_settings['account_id']
-#print("Oanda Access Connect :",access_token," ",access_id)
-#api = API(access_token=access_token)
-
-# Top 10 currency pairs
-#currency_pairs = [
-#    "EUR_USD",
-#    "AUD_USD",
-#    #"USD_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
-#    "GBP_USD",
-#    "USD_CHF",
-#    "USD_CAD",
-#    "NZD_USD",
-#    "EUR_GBP",
-#    #"EUR_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
-#    #"GBP_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
-#]
-
-# Create global flag variables for each currency pair
-#for currency in currency_pairs:
-#    globals()[currency + "_flag"] = False
-#    globals()[currency + "_flag_expiry_time"] = 0
+# Global variable to keep track of the first scan
+is_first_scan = True
 
 # Global moving average variables
 current_price = 0
@@ -78,21 +31,16 @@ ma100 = 0
 #NUM_POINTS = 101  # replaced with num_candles_to_fetch
 
 # Define the strategy classes
-class TrendingStrategy:
-    #def __init__(self, pair):
-    #    self.pair = pair
-        
+class TrendingStrategy:        
     def decide(self, data):
         global ma5, ma20, ma50
-        
+
         # Get the current market price for the currency pair
-        #market_price = data['price'].iloc[-1]
         market_price = float(data['candles'][-1]['mid']['c'])
-        #Print the current market price
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        #return "SELL"
+        return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma5 > ma20 > ma50 and market_price > ma5:
@@ -161,6 +109,7 @@ class RegulatoryStrategy:
         # Code for identifying a Regulatory market and making a decision
         print("RegulatoryStrategy.decide executed")
         return "BUY"
+
 # Function to fetch Historical Data
 def get_historical_data(pair, general_settings, granularity=None, count=None):
     if granularity is None:
@@ -252,13 +201,18 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
         return
 
     #Define Stop Loss Distance
-    stop_loss_distance = 0.0005 # set this to desired number of pips
-    take_profit_distance = 0.00025 # set this to desired number of pips 
+    #stop_loss_distance = 0.0005 # set this to desired number of pips
+    #take_profit_distance = 0.00025 # set this to desired number of pips 
+    stop_loss_distance = default_currency_settings['stop_loss_distance']
+    take_profit_distance = default_currency_settings['take_profit_distance']
 
     #Define the opportunity to buy window
-    buy_below_distance = 0.0000 #0.0010 set this to desired number of pips below current price for a BUY trade
-    buy_above_distance = 0.0000 #0.0010 set this to desired number of pips above current price for a SELL trade
+    #buy_below_distance = 0.0000 #0.0010 set this to desired number of pips below current price for a BUY trade
+    #buy_above_distance = 0.0000 #0.0010 set this to desired number of pips above current price for a SELL trade
+    buy_below_distance = default_currency_settings['buy_below_distance']
+    buy_above_distance = default_currency_settings['buy_above_distance']
     
+
     # Calculate the trade size based on 0.5% of the total account value * margin 50:1
     account_value = get_account_value()
     trade_value = account_value * 0.005 * 50
@@ -287,7 +241,7 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
     #allow_next_order_time_aest = expiry_time_utc.astimezone(tz_aest)
 
     # Format expiry time as string in the expected format
-    expiry_time_str = expiry_time_aest.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    expiry_time_str = expiry_time_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
     # Once the trade is executed, set the corresponding flag to True
     globals()[tagname_expiry_flag] = True
@@ -334,7 +288,6 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
         }
 
         try:
-            #time.sleep(10) # Pause not required
             #print(f"DEBUG 4 {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")
             request = orders.OrderCreate(account_id, data=order_data)
             api.request(request)
@@ -375,9 +328,9 @@ def main(general_settings, default_currency_settings, currency_pairs):
         #print("EUR_USD Expiry Time:",EUR_USD_flag_expiry_time)
         #print("AUD_USD Expiry Flag:",AUD_USD_flag)
         #print("AUD_USD Expiry Time:",AUD_USD_flag_expiry_time)
-        print("DEBUG 10 pair:",pair )
+
         pair_data = get_historical_data(pair, general_settings)
-        
+
         # Process the data and calculate moving averages
         if pair_data is None:
             print("Error fetching historical data.")
@@ -400,9 +353,6 @@ def main(general_settings, default_currency_settings, currency_pairs):
         print("MA20 :", ma20)
         print("MA50 :", ma50)
         print("MA100:", ma100)
-
-        #strategy = select_strategy(pair, pair_data)
-        #print(f"Selected strategy for {pair}: {strategy}")
 
         # Initialize strategy objects
         trending_strategy = TrendingStrategy()
@@ -450,6 +400,7 @@ def main(general_settings, default_currency_settings, currency_pairs):
 #    main()
 
 while True:
+
     # Read config.ini file
     config = configparser.ConfigParser()
     config.read('config.ini')
@@ -469,8 +420,7 @@ while True:
         'gen_parameter5': float(config.get('general', 'gen_parameter5')),
         'gen_parameter6': float(config.get('general', 'gen_parameter6')),
 }
-    
-    
+
     # Default currency settings
     default_currency_settings = {
         'scaling': float(config.get('default_currency_settings', 'scaling')),
@@ -482,8 +432,12 @@ while True:
         'take_profit_distance': float(config.get('default_currency_settings', 'take_profit_distance')),
         'buy_below_distance': float(config.get('default_currency_settings', 'buy_below_distance')),
         'buy_above_distance': float(config.get('default_currency_settings', 'buy_above_distance')),
-        
         'parameter1': float(config.get('default_currency_settings', 'parameter1')),
+        'parameter2': float(config.get('default_currency_settings', 'parameter2')),
+        'parameter3': float(config.get('default_currency_settings', 'parameter3')),
+        'parameter4': float(config.get('default_currency_settings', 'parameter4')),
+        'parameter5': float(config.get('default_currency_settings', 'parameter5')),
+        'parameter6': float(config.get('default_currency_settings', 'parameter6')),
     }
 
     # Currency Pair Data
@@ -497,15 +451,15 @@ while True:
             }
 
     # Create global flag variables for each currency pair
-    for currency in currency_pairs:
-        globals()[currency + "_flag"] = False
-        globals()[currency + "_flag_expiry_time"] = 0
+    if is_first_scan:
+        for currency in currency_pairs:
+            globals()[currency + "_flag"] = False
+            globals()[currency + "_flag_expiry_time"] = 0
 
     # Initialize API connection
     access_token = general_settings['access_token']
     account_id = general_settings['account_id']
     api = API(access_token=access_token)
-    #account = accounts.AccountDetails(account_id)
 
     # Now you can use the config values
 
@@ -514,6 +468,11 @@ while True:
     
     #Call Main Function
     main(general_settings, default_currency_settings, currency_pairs)
+    
+    # After the first scan is complete, set is_first_scan to False
+    if is_first_scan:
+        is_first_scan = False
 
     time.sleep(30) # Pause the while loop for 30 seconds
 
+    
