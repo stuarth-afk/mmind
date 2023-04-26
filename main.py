@@ -315,11 +315,25 @@ def execute_trade(pair, decision):
     else:
         print(f"Insufficient account value to place {decision} order for {pair}")
 
-def example_function(api, default_currency_settings, currency_pairs):
-    # Your trading logic here, using the values from the dictionaries
-    print("api",api)
-    print("Default currency settings:", default_currency_settings)
-    print("Currency pairs:", currency_pairs)
+def example_function(gen_parameter1, default_currency_settings, currency_pairs):
+    # Print a single general value 
+    print("Single gen_parameter1:",gen_parameter1)     
+
+    # Print a single value from the default_currency_settings dictionary
+    print("OrderType:", default_currency_settings['OrderType'])
+    print("parameter1:",default_currency_settings['parameter1'])
+
+    # Print a single value from the currency_pairs dictionary
+    print("\nEUR_USD scaling:", currency_pairs['EUR_USD']['scaling'])
+    print("pair:",currency_pairs['EUR_USD']['pair'],"\n")
+    
+    # Iterate through currency_pairs and print pair values
+    for currency_pair, settings in currency_pairs.items():
+        print(f"{currency_pair} pair:", settings['pair'])
+
+    # Print All Values from Dictionaries
+    print("\nAll Default currency settings:", default_currency_settings)
+    print("All Currency Pair Data:", currency_pairs)
 
 # Main function
 def main():
@@ -409,7 +423,7 @@ while True:
     account_id = config.get('general', 'account_id')
     account_margin = float(config.get('general', 'account_margin'))
     trade_size = float(config.get('general', 'trade_size'))
-    candle_size = float(config.get('general', 'candle_size'))
+    candle_size = config.get('general', 'candle_size')
     num_candles_to_fetch = float(config.get('general', 'num_candles_to_fetch'))
     gen_parameter1 = float(config.get('general', 'gen_parameter1'))
     gen_parameter2 = float(config.get('general', 'gen_parameter2'))
@@ -439,7 +453,7 @@ while True:
     for section in config.sections():
         if section != 'general' and section != 'default_currency_settings':
             currency_pairs[section] = {
-                'pair': float(config.get(section, 'pair')),
+                'pair': config.get(section, 'pair'),
                 'scaling': float(config.get(section, 'scaling')),
                 'strategy': config.get(section, 'strategy')
             }
@@ -457,7 +471,7 @@ while True:
     #print("Current Settings: ",setting1, setting2, db_host, db_port, db_user, db_password)
 
     # Call the example function with the dictionaries as arguments
-    example_function(api, default_currency_settings, currency_pairs)
+    example_function(gen_parameter1, default_currency_settings, currency_pairs)
 
     #main() # Call main function
 
