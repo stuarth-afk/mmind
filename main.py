@@ -467,6 +467,7 @@ while True:
         globals()[currency + "_flag_expiry_time"] = 0
 
     # Initialize API connection
+    access_token = general_settings['access_token']
     api = API(access_token=access_token)
     #account = accounts.AccountDetails(account_id)
 
