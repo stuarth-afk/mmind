@@ -16,9 +16,35 @@ import pytz
 import numpy as np
 import configparser
 
+# Read config.ini file
+#config = configparser.ConfigParser()
+#config.read('config.ini')
+
+# General settings as a dictionary
+#firstscan_settings = {
+#        'access_token': config.get('general', 'access_token'),
+#        'account_id': config.get('general', 'account_id'),
+        #'account_margin': float(config.get('general', 'account_margin')),
+        #'trade_size': float(config.get('general', 'trade_size')),
+        #'candle_size': config.get('general', 'candle_size'),
+        #'num_candles_to_fetch': int(config.get('general', 'num_candles_to_fetch')),
+        #'gen_parameter1': float(config.get('general', 'gen_parameter1')),
+        #'gen_parameter2': float(config.get('general', 'gen_parameter2')),
+        #'gen_parameter3': float(config.get('general', 'gen_parameter3')),
+        #'gen_parameter4': float(config.get('general', 'gen_parameter4')),
+        #'gen_parameter5': float(config.get('general', 'gen_parameter5')),
+        #'gen_parameter6': float(config.get('general', 'gen_parameter6')),
+#}
+
+
+
+
 # Oanda API access token and account ID
 #access_token = "dae33bc19c79e146091e2e0030757964-0464b9a0b9f2944493bf47a8645c14c0"
 #account_id = "101-011-25242779-001"
+#access_token = firstscan_settings['access_token']
+#access_id = firstscan_settings['account_id']
+#print("Oanda Access Connect :",access_token," ",access_id)
 #api = API(access_token=access_token)
 
 # Top 10 currency pairs
@@ -49,7 +75,7 @@ ma50 = 0
 ma100 = 0
 
 #Global Program Settings
-NUM_POINTS = 101
+#NUM_POINTS = 101  # replaced with num_candles_to_fetch
 
 # Define the strategy classes
 class TrendingStrategy:
@@ -135,9 +161,13 @@ class RegulatoryStrategy:
         # Code for identifying a Regulatory market and making a decision
         print("RegulatoryStrategy.decide executed")
         return "BUY"
+# Function to fetch Historical Data
+def get_historical_data(pair, general_settings, granularity=None, count=None):
+    if granularity is None:
+        granularity = general_settings['candle_size']
+    if count is None:
+        count = general_settings['num_candles_to_fetch']
 
-# Function to fetch historical data
-def get_historical_data(pair, granularity="M1", count=NUM_POINTS):
     try:
         params = {"granularity": granularity, "count": count}
         request = instruments.InstrumentsCandles(instrument=pair, params=params)
@@ -208,7 +238,7 @@ def get_account_value():
     return
 
 # Function to execute a trade order to Oanda
-def execute_trade(pair, decision):
+def execute_trade(pair, decision, general_settings, default_currency_settings, currency_pairs):
     # Include Global Flags in this function to limit how many orders are placed for each currency pair.
     for currency in currency_pairs:
         if currency == pair:
@@ -234,7 +264,8 @@ def execute_trade(pair, decision):
     trade_value = account_value * 0.005 * 50
 
     # fetch the current price of the currency pair
-    ticker = get_historical_data(pair, granularity="S5", count=1)['candles'][0]['mid']['c']
+    #ticker = get_historical_data(pair, granularity="S5", count=1)['candles'][0]['mid']['c']
+    ticker = get_historical_data(pair,general_settings ,granularity="S5", count=1)['candles'][0]['mid']['c']
     print(f"5S Candle Updated Price of {pair}: {ticker}")
 
     trade_quantity = math.floor(trade_value / float(ticker))
@@ -337,17 +368,21 @@ def example_function(gen_parameter1, default_currency_settings, currency_pairs):
     print("All Currency Pair Data:", currency_pairs)
 
 # Main function
-def main():
+def main(general_settings, default_currency_settings, currency_pairs):
     for pair in currency_pairs:
         #DEBUG 6 
         #print("EUR_USD Expiry Flag:",EUR_USD_flag)
         #print("EUR_USD Expiry Time:",EUR_USD_flag_expiry_time)
         #print("AUD_USD Expiry Flag:",AUD_USD_flag)
         #print("AUD_USD Expiry Time:",AUD_USD_flag_expiry_time)
-
-        pair_data = get_historical_data(pair)
+        print("DEBUG 10 pair:",pair )
+        pair_data = get_historical_data(pair, general_settings)
         
         # Process the data and calculate moving averages
+        if pair_data is None:
+            print("Error fetching historical data.")
+            return
+
         candles = pair_data['candles']
         moving_avg_data = process_data_and_calculate_moving_averages(candles)
 
@@ -409,7 +444,7 @@ def main():
         # Call get_account_value() and execute_trade() if the decision is "BUY" or "SELL"
         if decision in ["BUY","SELL"]:
             print("Account Value:", get_account_value())
-            execute_trade(pair, decision)
+            execute_trade(pair, decision,general_settings, default_currency_settings, currency_pairs)
 
 #if __name__ == "__main__":
 #    main()
@@ -426,7 +461,7 @@ while True:
         'account_margin': float(config.get('general', 'account_margin')),
         'trade_size': float(config.get('general', 'trade_size')),
         'candle_size': config.get('general', 'candle_size'),
-        'num_candles_to_fetch': float(config.get('general', 'num_candles_to_fetch')),
+        'num_candles_to_fetch': int(config.get('general', 'num_candles_to_fetch')),
         'gen_parameter1': float(config.get('general', 'gen_parameter1')),
         'gen_parameter2': float(config.get('general', 'gen_parameter2')),
         'gen_parameter3': float(config.get('general', 'gen_parameter3')),
@@ -468,17 +503,17 @@ while True:
 
     # Initialize API connection
     access_token = general_settings['access_token']
+    account_id = general_settings['account_id']
     api = API(access_token=access_token)
     #account = accounts.AccountDetails(account_id)
 
-    # Now you can use the config values in your script
-    #print("Current Settings: ",setting1, setting2, db_host, db_port, db_user, db_password)
+    # Now you can use the config values
 
     # Call the example function with the dictionaries as arguments
     #example_function(general_settings, default_currency_settings, currency_pairs)
     
     #Call Main Function
-    main()
+    main(general_settings, default_currency_settings, currency_pairs)
 
     time.sleep(30) # Pause the while loop for 30 seconds
 
