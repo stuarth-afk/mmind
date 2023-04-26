@@ -1,7 +1,6 @@
-#Money Mind
+# Money Mind
 # stuarth-afk
-# Oanda trading program
-# test1
+# Oanda Currency Trading Program
 
 import oandapyV20
 from oandapyV20 import API
@@ -410,8 +409,16 @@ while True:
     account_id = config.get('general', 'account_id')
     account_margin = float(config.get('general', 'account_margin'))
     trade_size = float(config.get('general', 'trade_size'))
+    candle_size = float(config.get('general', 'candle_size'))
     num_candles_to_fetch = float(config.get('general', 'num_candles_to_fetch'))
-
+    gen_parameter1 = float(config.get('general', 'gen_parameter1'))
+    gen_parameter2 = float(config.get('general', 'gen_parameter2'))
+    gen_parameter3 = float(config.get('general', 'gen_parameter3'))
+    gen_parameter4 = float(config.get('general', 'gen_parameter4'))
+    gen_parameter5 = float(config.get('general', 'gen_parameter5'))
+    gen_parameter6 = float(config.get('general', 'gen_parameter6'))
+    
+    
     # Default currency settings
     default_currency_settings = {
         'scaling': float(config.get('default_currency_settings', 'scaling')),
@@ -423,6 +430,8 @@ while True:
         'take_profit_distance': float(config.get('default_currency_settings', 'take_profit_distance')),
         'buy_below_distance': float(config.get('default_currency_settings', 'buy_below_distance')),
         'buy_above_distance': float(config.get('default_currency_settings', 'buy_above_distance')),
+        
+        'parameter1': float(config.get('default_currency_settings', 'parameter1')),
     }
 
     # Currency Pair Data
@@ -431,7 +440,8 @@ while True:
         if section != 'general' and section != 'default_currency_settings':
             currency_pairs[section] = {
                 'pair': float(config.get(section, 'pair')),
-                'scaling': float(config.get(section, 'scaling'))
+                'scaling': float(config.get(section, 'scaling')),
+                'strategy': config.get(section, 'strategy')
             }
 
     # Create global flag variables for each currency pair
