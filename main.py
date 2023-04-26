@@ -14,6 +14,7 @@ import time
 import datetime
 import pytz
 import numpy as np
+import configparser
 
 # Oanda API access token and account ID
 access_token = "dae33bc19c79e146091e2e0030757964-0464b9a0b9f2944493bf47a8645c14c0"
@@ -393,5 +394,20 @@ def main():
 #    main()
 
 while True:
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    setting1 = config.get('general', 'setting1')
+    setting2 = config.get('general', 'setting2')
+
+    db_host = config.get('database', 'host')
+    db_port = config.getint('database', 'port')
+    db_user = config.get('database', 'user')
+    db_password = config.get('database', 'password')
+
+    # Now you can use the config values in your script
+    print("Current Settings: ",setting1, setting2, db_host, db_port, db_user, db_password)
+
     main() # Call main function
+
     time.sleep(30) # Pause the while loop for 30 seconds
