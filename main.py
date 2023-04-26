@@ -17,28 +17,28 @@ import numpy as np
 import configparser
 
 # Oanda API access token and account ID
-access_token = "dae33bc19c79e146091e2e0030757964-0464b9a0b9f2944493bf47a8645c14c0"
-account_id = "101-011-25242779-001"
-api = API(access_token=access_token)
+#access_token = "dae33bc19c79e146091e2e0030757964-0464b9a0b9f2944493bf47a8645c14c0"
+#account_id = "101-011-25242779-001"
+#api = API(access_token=access_token)
 
 # Top 10 currency pairs
-currency_pairs = [
-    "EUR_USD",
-    "AUD_USD",
-    #"USD_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
-    "GBP_USD",
-    "USD_CHF",
-    "USD_CAD",
-    "NZD_USD",
-    "EUR_GBP",
-    #"EUR_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
-    #"GBP_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
-]
+#currency_pairs = [
+#    "EUR_USD",
+#    "AUD_USD",
+#    #"USD_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
+#    "GBP_USD",
+#    "USD_CHF",
+#    "USD_CAD",
+#    "NZD_USD",
+#    "EUR_GBP",
+#    #"EUR_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
+#    #"GBP_JPY", #Do not enable Japanese Currency Pair, it needs logic to allow for greater pip size
+#]
 
 # Create global flag variables for each currency pair
-for currency in currency_pairs:
-    globals()[currency + "_flag"] = False
-    globals()[currency + "_flag_expiry_time"] = 0
+#for currency in currency_pairs:
+#    globals()[currency + "_flag"] = False
+#    globals()[currency + "_flag_expiry_time"] = 0
 
 # Global moving average variables
 current_price = 0
@@ -315,6 +315,12 @@ def execute_trade(pair, decision):
     else:
         print(f"Insufficient account value to place {decision} order for {pair}")
 
+def example_function(api, default_currency_settings, currency_pairs):
+    # Your trading logic here, using the values from the dictionaries
+    print("api",api)
+    print("Default currency settings:", default_currency_settings)
+    print("Currency pairs:", currency_pairs)
+
 # Main function
 def main():
     for pair in currency_pairs:
@@ -394,20 +400,55 @@ def main():
 #    main()
 
 while True:
+    # Read config.ini file
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    setting1 = config.get('general', 'setting1')
-    setting2 = config.get('general', 'setting2')
+    # General settings
+    access_token = config.get('general', 'access_token')
+    account_id = config.get('general', 'account_id')
+    account_margin = float(config.get('general', 'account_margin'))
+    trade_size = float(config.get('general', 'trade_size'))
+    num_candles_to_fetch = float(config.get('general', 'num_candles_to_fetch'))
 
-    db_host = config.get('database', 'host')
-    db_port = config.getint('database', 'port')
-    db_user = config.get('database', 'user')
-    db_password = config.get('database', 'password')
+    # Default currency settings
+    default_currency_settings = {
+        'scaling': float(config.get('default_currency_settings', 'scaling')),
+        'OrderType': config.get('default_currency_settings', 'OrderType'),
+        'TimeInForce': config.get('default_currency_settings', 'TimeInForce'),
+        'TakeProfitOnFill_TimeInForce': config.get('default_currency_settings', 'TakeProfitOnFill_TimeInForce'),
+        'TrailingStopLossOnFill_TimeInForce': config.get('default_currency_settings', 'TrailingStopLossOnFill_TimeInForce'),
+        'stop_loss_distance': float(config.get('default_currency_settings', 'stop_loss_distance')),
+        'take_profit_distance': float(config.get('default_currency_settings', 'take_profit_distance')),
+        'buy_below_distance': float(config.get('default_currency_settings', 'buy_below_distance')),
+        'buy_above_distance': float(config.get('default_currency_settings', 'buy_above_distance')),
+    }
+
+    # Currency Pair Data
+    currency_pairs = {}
+    for section in config.sections():
+        if section != 'general' and section != 'default_currency_settings':
+            currency_pairs[section] = {
+                'pair': float(config.get(section, 'pair')),
+                'scaling': float(config.get(section, 'scaling'))
+            }
+
+    # Create global flag variables for each currency pair
+    for currency in currency_pairs:
+        globals()[currency + "_flag"] = False
+        globals()[currency + "_flag_expiry_time"] = 0
+
+    # Initialize API connection
+    api = API(access_token=access_token)
+    #account = accounts.AccountDetails(account_id)
 
     # Now you can use the config values in your script
-    print("Current Settings: ",setting1, setting2, db_host, db_port, db_user, db_password)
+    #print("Current Settings: ",setting1, setting2, db_host, db_port, db_user, db_password)
 
-    main() # Call main function
+    # Call the example function with the dictionaries as arguments
+    example_function(api, default_currency_settings, currency_pairs)
+
+    #main() # Call main function
 
     time.sleep(30) # Pause the while loop for 30 seconds
+
