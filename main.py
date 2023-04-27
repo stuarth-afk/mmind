@@ -31,7 +31,7 @@ ma100 = 0
 #NUM_POINTS = 101  # replaced with num_candles_to_fetch
 
 # Define the strategy classes
-class TrendingStrategy:        
+class TrendingStrategy1:        
     def decide(self, data):
         global ma5, ma20, ma50
 
@@ -40,7 +40,7 @@ class TrendingStrategy:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        return "BUY"
+        #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma5 > ma20 > ma50 and market_price > ma5:
@@ -56,55 +56,55 @@ class TrendingStrategy:
             print("NO ACTION")
             return "NO ACTION"
 
-class RangingStrategy:
+class RangingStrategy1:
     def decide(self, data):
         # Code for identifying support and resistance levels and making a decision
-        print("RangingStrategy.decide executed")
+        print("RangingStrategy1.decide executed")
         return "SELL"
 
-class VolatileStrategy:
+class VolatileStrategy1:
     def decide(self, data):
         # Code for managing risk in volatile markets and making a decision
-        print("VolatileStrategy.decide executed")
+        print("VolatileStrategy1.decide executed")
         return "BUY"
 
-class LowVolatilityStrategy:
+class LowVolatilityStrategy1:
     def decide(self, data):
         # Code for identifying the trend and making a decision
-        print("LowVolatilityStrategy.decide executed")
+        print("LowVolatilityStrategy1.decide executed")
         return "BUY"
 
-class HighLiquidityStrategy:
+class HighLiquidityStrategy1:
     def decide(self, data):
         # Code for identifying support and resistance levels and making a decision
-        print("HighLiquidityStrategy.decide executed")
+        print("HighLiquidityStrategy1.decide executed")
         return "SELL"
 
-class LowLiquidityStrategy:
+class LowLiquidityStrategy1:
     def decide(self, data):
         # Code for managing risk in volatile markets and making a decision
-        print("LowLiquidityStrategy.decide executed")
+        print("LowLiquidityStrategy1.decide executed")
         return "BUY"
 
-class FundamentalStrategy:
+class FundamentalStrategy1:
     def decide(self, data):
         # Code for identifying the trend and making a decision
         print("FundamentalStrategy.decide executed")
         return "BUY"
 
-class TechnicalStrategy:
+class TechnicalStrategy1:
     def decide(self, data):
         # Code for identifying support and resistance levels and making a decision
         print("TechnicalStrategy.decide executed")
         return "SELL"
 
-class SentimentStrategy:
+class SentimentStrategy1:
     def decide(self, data):
         # Code for managing risk in volatile markets and making a decision
         print("SentimentStrategy.decide executed")
         return "BUY"
 
-class RegulatoryStrategy:
+class RegulatoryStrategy1:
     def decide(self, data):
         # Code for identifying a Regulatory market and making a decision
         print("RegulatoryStrategy.decide executed")
@@ -163,16 +163,16 @@ def process_data_and_calculate_moving_averages(candles):
 def select_strategy(pair, pair_data):
     # Analyze the data and choose the best strategy from the 10 strategies
     # This will require implementing the analysis logic based on the strategies mentioned above
+    # Code required ...
 
-    if pair == "EUR_USD":
-        #print("EUR_USD Market to apply a Trending Strategy")
-        return "trending"
-    elif pair == "AUD_USD":
-        #print("AUD_USD Market to apply a Trending Strategy")
-        return "trending"
-    else :
-        #print("Default Trending Strategy Selected")
-        return "trending"
+    # else use the strategy in the config.ini file. Default is "TrendingStrategy1"
+    # Check if the pair exists in the currency_pairs dictionary
+    if pair in currency_pairs:
+        # Return the strategy value from the dictionary
+        return currency_pairs[pair]['strategy']
+    else:
+        # If the pair is not found in the dictionary, return a default strategy value
+        return "TrendingStrategy1"
 
 # Get account value and other details
 def get_account_value():
@@ -355,41 +355,45 @@ def main(general_settings, default_currency_settings, currency_pairs):
         print("MA100:", ma100)
 
         # Initialize strategy objects
-        trending_strategy = TrendingStrategy()
-        ranging_strategy = RangingStrategy()
-        volatile_strategy = VolatileStrategy()
-        low_volatility_strategy = LowVolatilityStrategy()
-        high_liquidity_strategy = HighLiquidityStrategy()
-        low_liquidity_strategy = LowLiquidityStrategy()
-        fundamental_strategy = FundamentalStrategy()
-        technical_strategy = TechnicalStrategy()
-        sentiment_strategy = SentimentStrategy()
-        regulatory_strategy = RegulatoryStrategy()
+        trending_strategy1 = TrendingStrategy1()
+        ranging_strategy1 = RangingStrategy1()
+        volatile_strategy1 = VolatileStrategy1()
+        low_volatility_strategy1 = LowVolatilityStrategy1()
+        high_liquidity_strategy1 = HighLiquidityStrategy1()
+        low_liquidity_strategy1 = LowLiquidityStrategy1()
+        fundamental_strategy1 = FundamentalStrategy1()
+        technical_strategy1 = TechnicalStrategy1()
+        sentiment_strategy1 = SentimentStrategy1()
+        regulatory_strategy1 = RegulatoryStrategy1()
 
         #initialise decision variable
         decision = None
 
         # Execute the selected strategy
-        if strategy == "trending":
-            decision = trending_strategy.decide(pair_data)
-        elif strategy == "ranging":
-            decision = ranging_strategy.decide(pair_data)
-        elif strategy == "volatile":
-            decision = volatile_strategy.decide(pair_data)
-        elif strategy == "low_volatility":
-            decision = low_volatility_strategy.decide(pair_data)
-        elif strategy == "high_liquidity":
-            decision = high_liquidity_strategy.decide(pair_data)
-        elif strategy == "low_liquidity":
-            decision = low_liquidity_strategy.decide(pair_data)
-        elif strategy == "fundamental":
-            decision = fundamental_strategy.decide(pair_data)
-        elif strategy == "technical":
-            decision = technical_strategy.decide(pair_data)
-        elif strategy == "sentiment":
-            decision = sentiment_strategy.decide(pair_data)
-        elif strategy == "regulatory":
-            decision = regulatory_strategy.decide(pair_data)
+        if strategy == "TrendingStrategy1":
+            decision = trending_strategy1.decide(pair_data)
+        elif strategy == "TrendingStrategy2":
+            decision = trending_strategy1.decide(pair_data)
+        elif strategy == "TrendingStrategy3":
+            decision = trending_strategy1.decide(pair_data)
+        elif strategy == "RangingStrategy1":
+            decision = ranging_strategy1.decide(pair_data)
+        elif strategy == "VolatileStrategy1":
+            decision = volatile_strategy1.decide(pair_data)
+        elif strategy == "LowVolatilityStrategy1":
+            decision = low_volatility_strategy1.decide(pair_data)
+        elif strategy == "HighLiquidityStrategy1":
+            decision = high_liquidity_strategy1.decide(pair_data)
+        elif strategy == "LowLiquidityStrategy1":
+            decision = low_liquidity_strategy1.decide(pair_data)
+        elif strategy == "FundamentalStrategy1":
+            decision = fundamental_strategy1.decide(pair_data)
+        elif strategy == "TechnicalStrategy1":
+            decision = technical_strategy1.decide(pair_data)
+        elif strategy == "SentimentStrategy1":
+            decision = sentiment_strategy1.decide(pair_data)
+        elif strategy == "RegulatoryStrategy1":
+            decision = regulatory_strategy1.decide(pair_data)
 
         # Call get_account_value() and execute_trade() if the decision is "BUY" or "SELL"
         if decision in ["BUY","SELL"]:
@@ -475,4 +479,3 @@ while True:
 
     time.sleep(30) # Pause the while loop for 30 seconds
 
-    
