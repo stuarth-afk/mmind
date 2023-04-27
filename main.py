@@ -279,20 +279,19 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
     #Define Stop Loss Distance
     #stop_loss_distance = 0.0005 # set this to desired number of pips
     #take_profit_distance = 0.00025 # set this to desired number of pips 
-    stop_loss_distance = default_currency_settings['stop_loss_distance']
-    take_profit_distance = default_currency_settings['take_profit_distance']
+    stop_loss_distance = default_currency_settings['stop_loss_distance'] * pair['scaling']
+    take_profit_distance = default_currency_settings['take_profit_distance'] * pair['scaling']
 
     #Define the opportunity to buy window
     #buy_below_distance = 0.0000 #0.0010 set this to desired number of pips below current price for a BUY trade
     #buy_above_distance = 0.0000 #0.0010 set this to desired number of pips above current price for a SELL trade
-    buy_below_distance = default_currency_settings['buy_below_distance']
-    buy_above_distance = default_currency_settings['buy_above_distance']
+    buy_below_distance = default_currency_settings['buy_below_distance'] * pair['scaling']
+    buy_above_distance = default_currency_settings['buy_above_distance'] * pair['scaling']
     
-
     # Calculate the trade size based on 0.5% of the total account value * margin 50:1
     account_value = get_account_value()
-    trade_value = account_value * 0.005 * 50
-
+    trade_value = account_value * general_settings['trade_size'] * general_settings['account_margin'] #* 0.005 * 50 
+    
     # fetch the current price of the currency pair
     #ticker = get_historical_data(pair, granularity="S5", count=1)['candles'][0]['mid']['c']
     ticker = get_historical_data(pair,general_settings ,granularity="S5", count=1)['candles'][0]['mid']['c']
