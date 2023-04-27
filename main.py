@@ -19,13 +19,14 @@ import configparser
 # Global variable to keep track of the first scan
 is_first_scan = True
 
-# Global moving average variables
+# Global moving average and other data variables
 current_price = 0
 ma5 =  0
 ma10 = 0
 ma20 = 0
 ma50 = 0
 ma100 = 0
+current_rsi = 50   
 
 #Global Program Settings
 #NUM_POINTS = 101  # replaced with num_candles_to_fetch
@@ -41,7 +42,11 @@ class TrendingStrategy1:
 
         #DEBUG FORCE CODE
         #return "BUY"
-
+        
+        print("\nDEBUG 12\nUpper RSI SETTING:", self.upper_rsi )
+        print("DEBUG 12b Current RSI:", current_rsi )
+        print("DEBUG 12 Lower RSI SETTING:", self.lower_rsi,"\n" )   
+            
         # Determine whether the market is trending up or down based on the moving averages
         if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi < self.lower_rsi :
             # The market is trending up and the current price is above the 5-candle moving average, so execute a "BUY"
