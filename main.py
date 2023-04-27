@@ -33,7 +33,7 @@ ma100 = 0
 # Define the strategy classes
 class TrendingStrategy1:        
     def decide(self, data):
-        global ma5, ma20, ma50
+        global ma5, , ma10, ma20, ma50, ma100, current_rsi
 
         # Get the current market price for the currency pair
         market_price = float(data['candles'][-1]['mid']['c'])
@@ -43,11 +43,11 @@ class TrendingStrategy1:
         #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
-        if ma5 > ma20 > ma50 and market_price > ma5:
+        if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi < self.lower_rsi :
             # The market is trending up and the current price is above the 5-candle moving average, so execute a "BUY"
             print("BUY")
             return "BUY"
-        elif ma5 < ma20 < ma50 and market_price < ma5:
+        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi > self.upper_rsi :
             # The market is trending down and the current price is below the 5-candle moving average, so execute a "SELL"
             print("SELL")
             return "SELL"
@@ -56,6 +56,56 @@ class TrendingStrategy1:
             print("NO ACTION")
             return "NO ACTION"
 
+class TrendingStrategy2:        
+    def decide(self, data):
+        global ma5, , ma10, ma20, ma50, ma100, current_rsi
+
+        # Get the current market price for the currency pair
+        market_price = float(data['candles'][-1]['mid']['c'])
+        #print(f"Market Price:", market_price)
+
+        #DEBUG FORCE CODE
+        #return "BUY"
+
+        # Determine whether the market is trending up or down based on the moving averages
+        if ma10 > ma20 > ma50 > and market_price > ma10 and current_rsi < self.lower_rsi:
+            # The market is trending up and the current price is above the 5-candle moving average, so execute a "BUY"
+            print("BUY")
+            return "BUY"
+        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi > self.upper_rsi:
+            # The market is trending down and the current price is below the 5-candle moving average, so execute a "SELL"
+            print("SELL")
+            return "SELL"
+        else:
+            # The market is not trending or the current price is between the moving averages, so do not execute a trade
+            print("NO ACTION")
+            return "NO ACTION"
+        
+class TrendingStrategy3:        
+    def decide(self, data):
+        global ma5, , ma10, ma20, ma50, ma100, current_rsi
+
+        # Get the current market price for the currency pair
+        market_price = float(data['candles'][-1]['mid']['c'])
+        #print(f"Market Price:", market_price)
+
+        #DEBUG FORCE CODE
+        #return "BUY"
+
+        # Determine whether the market is trending up or down based on the moving averages
+        if ma20 > ma50 > ma100 and market_price > ma20 and current_rsi < self.lower_rsi:
+            # The market is trending up and the current price is above the 20-candle moving average, so execute a "BUY"
+            print("BUY")
+            return "BUY"
+        elif ma20 < ma50 < ma100 and market_price < ma20 and current_rsi > self.upper_rsi:
+            # The market is trending down and the current price is below the 20-candle moving average, so execute a "SELL"
+            print("SELL")
+            return "SELL"
+        else:
+            # The market is not trending or the current price is between the moving averages, so do not execute a trade
+            print("NO ACTION")
+            return "NO ACTION"
+        
 class RangingStrategy1:
     def decide(self, data):
         # Code for identifying support and resistance levels and making a decision
@@ -126,8 +176,20 @@ def get_historical_data(pair, general_settings, granularity=None, count=None):
     except Exception as e:
         print(f"Fetch Error Occurred in get_historical_data: {e}")
     return
+#Relative Strength Indicator
+def rsi(data, period=14):
+    delta = data['Close'].diff()
+    gain, loss = delta.copy(), delta.copy()
+    gain[gain < 0] = 0
+    loss[loss > 0] = 0
 
-# Function to process data and calculate moving averages
+    avg_gain = gain.rolling(window=period).mean()
+    avg_loss = loss.abs().rolling(window=period).mean()
+
+    rs = avg_gain / avg_loss
+    return 100 - (100 / (1 + rs))
+
+# Function to process data and calculate moving averages and RSI
 def process_data_and_calculate_moving_averages(candles):
     # Process the data and create a pandas DataFrame
     data = pd.DataFrame([{
@@ -142,6 +204,13 @@ def process_data_and_calculate_moving_averages(candles):
     data['MA50'] = data['Close'].rolling(window=50).mean()
     data['MA100'] = data['Close'].rolling(window=100).mean()
 
+    # Calculate RSI
+    data['RSI'] = rsi(data)
+    
+        # Assign the most recent moving average and RSI values to global variables
+    # ... (same as before)
+    
+    
     # Assign the most recent moving average values to global variables
     global current_price 
     global ma5 
@@ -149,14 +218,16 @@ def process_data_and_calculate_moving_averages(candles):
     global ma20
     global ma50 
     global ma100
-
+    global current_rsi
+   
     current_price = round(float(data['MA5'].iloc[-1]),4)
     ma5 = round(float(data['MA5'].iloc[-1]),4)
     ma10 = round(float(data['MA10'].iloc[-1]),4)
     ma20 = round(float(data['MA20'].iloc[-1]),4)
     ma50 = round(float(data['MA50'].iloc[-1]),4)
     ma100 = round(float(data['MA100'].iloc[-1]),4)
-
+    current_rsi = round(float(data['RSI'].iloc[-1]), 4)
+    
     return data
 
 # Function to analyze market conditions and select the best trading strategy
@@ -436,6 +507,8 @@ while True:
         'take_profit_distance': float(config.get('default_currency_settings', 'take_profit_distance')),
         'buy_below_distance': float(config.get('default_currency_settings', 'buy_below_distance')),
         'buy_above_distance': float(config.get('default_currency_settings', 'buy_above_distance')),
+        'lower_rsi': float(config.get('default_currency_settings', 'lower_rsi')),
+        'upper_rsi': float(config.get('default_currency_settings', 'upper_rsi')),
         'parameter1': float(config.get('default_currency_settings', 'parameter1')),
         'parameter2': float(config.get('default_currency_settings', 'parameter2')),
         'parameter3': float(config.get('default_currency_settings', 'parameter3')),
