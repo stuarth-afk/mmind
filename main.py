@@ -345,7 +345,7 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
         order_data = {
             "order": {
                 "units": f"{trade_quantity}" if decision == "BUY" else f"-{trade_quantity}",
-                "price": str(opportunity_price),
+                "price": str(round(opportunity_price,5)),
                 "instrument": pair,
                 "timeInForce": "GTD",
                 "type": "LIMIT",
@@ -356,7 +356,7 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
                      "timeInForce": "GTC" 
                 },
                 "trailingStopLossOnFill": {
-                    "distance": str(stop_loss_distance),
+                    "distance": str(round(stop_loss_distance,5)),
                     "timeInForce": "GTC",
                     "type": "TRAILING_STOP_LOSS"
                 }
