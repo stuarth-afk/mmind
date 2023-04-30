@@ -45,7 +45,7 @@ class TrendingStrategy1:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        return "BUY"
+        #return "BUY"
         
         print("\nDEBUG 12\nUpper RSI SETTING:", self.upper_rsi )
         print("DEBUG 12b Current RSI:", current_rsi )
@@ -78,7 +78,7 @@ class TrendingStrategy2:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        return "BUY"
+        #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma10 > ma20 > ma50 and market_price > ma10 and current_rsi < self.lower_rsi:
@@ -107,7 +107,7 @@ class TrendingStrategy3:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        return "BUY"
+        #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma20 > ma50 > ma100 and market_price > ma20 and current_rsi < self.lower_rsi:
