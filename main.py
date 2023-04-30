@@ -277,10 +277,10 @@ def get_account_value():
 # Function to execute a trade order to Oanda
 def execute_trade(pair, decision, general_settings, default_currency_settings, currency_pairs):
     # Include Global Flags in this function to limit how many orders are placed for each currency pair.
-    for currency in currency_pairs:
-        if currency == pair:
-            tagname_expiry_flag = currency + "_flag"
-            tagname_expiry_time = currency + "_flag_expiry_time"
+    for currency_key in currency_pairs:
+        if currency_pairs[currency_key] == pair:
+            tagname_expiry_flag = currency_key + "_flag"
+            tagname_expiry_time = currency_key + "_flag_expiry_time"
             break
 
     # If the expiry flag is set, then do not execute this function
