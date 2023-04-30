@@ -274,7 +274,6 @@ def get_account_value():
          print("Fetch Error Occurreed in get_account_value()")
     return
 
-# Function to execute a trade order to Oanda
 def execute_trade(pair_settings, decision, general_settings, default_currency_settings, currency_pairs):
     pair = pair_settings['pair']
     
@@ -291,12 +290,13 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
         return
 
     # Define Stop Loss Distance and Take Profit Distance
-    stop_loss_distance = default_currency_settings['stop_loss_distance'] * pair_settings['scaling']
-    take_profit_distance = default_currency_settings['take_profit_distance'] * pair_settings['scaling']
+    round_decimals = 3 if pair in ["USD_JPY", "EUR_JPY", "GBP_JPY"] else 5
+    stop_loss_distance = round((default_currency_settings['stop_loss_distance'] * pair_settings['scaling']), round_decimals)
+    take_profit_distance = round((default_currency_settings['take_profit_distance'] * pair_settings['scaling']), round_decimals)
 
     # Define the opportunity to buy window
-    buy_below_distance = default_currency_settings['buy_below_distance'] * pair_settings['scaling']
-    buy_above_distance = default_currency_settings['buy_above_distance'] * pair_settings['scaling']
+    buy_below_distance = round((default_currency_settings['buy_below_distance'] * pair_settings['scaling']), round_decimals)
+    buy_above_distance = round((default_currency_settings['buy_above_distance'] * pair_settings['scaling']), round_decimals)
 
     # Calculate the trade size based on 0.5% of the total account value * margin 50:1
     account_value = get_account_value()
@@ -310,9 +310,9 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
 
     # set the price that a buy/sell will occur
     if decision == "BUY":
-         opportunity_price = round(float(ticker)  - buy_below_distance,5) # set to x pips below current price for a BUY
+         opportunity_price = round(float(ticker)  - buy_below_distance, round_decimals) # set to x pips below current price for a BUY
     elif decision == "SELL":
-        opportunity_price = round(float(ticker)  + buy_above_distance,5) # set to x pips above current price for a SELL
+        opportunity_price = round(float(ticker)  + buy_above_distance, round_decimals) # set to x pips above current price for a SELL
     else :
         opportunity_price = 0 # set to 0 for NO ACTION
 
@@ -333,35 +333,38 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
     globals()[tagname_expiry_time] = expiry_time_aest
 
     # Define a function to set the flag back to False when the expiry time is reached
-    def set_flag_false():
-        globals()[tagname_expiry_flag] = False
-        globals()[tagname_expiry_time]= 0
+def set_flag_false():
+    globals()[tagname_expiry_flag] = False
+    globals()[tagname_expiry_time]= 0
 
-    # Schedule the set_flag_false function to be called after the expiry time has passed
-    timer = threading.Timer((expiry_time_utc - datetime.datetime.utcnow()).total_seconds(), set_flag_false)
-    timer.start()
+# Schedule the set_flag_false function to be called after the expiry time has passed
+timer = threading.Timer((expiry_time_utc - datetime.datetime.utcnow()).total_seconds(), set_flag_false)
+timer.start()
 
-    if trade_quantity > 0:
-        order_data = {
-            "order": {
-                "units": f"{trade_quantity}" if decision == "BUY" else f"-{trade_quantity}",
-                "price": str(round(opportunity_price,5)),
-                "instrument": pair,
-                "timeInForce": "GTD",
-                "type": "LIMIT",
-                "gtdTime": expiry_time_str,
-                "positionFill": "DEFAULT",
-                "takeProfitOnFill": {
-                     "price": str(round((opportunity_price + take_profit_distance),5)) if decision == "BUY" else str(round((opportunity_price - take_profit_distance),5)),
-                     "timeInForce": "GTC" 
-                },
-                "trailingStopLossOnFill": {
-                    "distance": str(round(stop_loss_distance,5)),
-                    "timeInForce": "GTC",
-                    "type": "TRAILING_STOP_LOSS"
-                }
+if trade_quantity > 0:
+    order_data = {
+        "order": {
+            "units": f"{trade_quantity}" if decision == "BUY" else f"-{trade_quantity}",
+            "price": str(round(opportunity_price, round_decimals)),
+            "instrument": pair,
+            "timeInForce": "GTD",
+            "type": "LIMIT",
+            "gtdTime": expiry_time_str,
+            "positionFill": "DEFAULT",
+            "takeProfitOnFill": {
+                 "price": str(round((opportunity_price + take_profit_distance), round_decimals)) if decision == "BUY" else str(round((opportunity_price - take_profit_distance), round_decimals)),
+                 "timeInForce": "GTC" 
+            },
+            "trailingStopLossOnFill": {
+                "distance": str(round(stop_loss_distance, round_decimals)),
+                "timeInForce": "GTC",
+                "type": "TRAILING_STOP_LOSS"
             }
         }
+    }
+
+
+    # Define a function to set the flag back to False when the expiry time is reached
 
         try:
             request = orders.OrderCreate(account_id, data=order_data)
@@ -369,7 +372,7 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
             response = request.response
             print(f"{decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} opportunity price")
         except Exception as e:
-            print(f"ORDER ERROR: {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")
+            print(f"ORDER ERROR: {decision} order placed for {pair}, quantity: {trade_quantity} units at opportunity price:{opportunity_price} with stop loss:{stop_loss_distance}  to expire {expiry_time_str} ")
             print(f"Request Order Error Occurred in execute_trade: {e}")
     else:
         print(f"Insufficient account value to place {decision} order for {pair}")
