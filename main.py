@@ -66,6 +66,10 @@ class TrendingStrategy1:
             return "NO ACTION"
 
 class TrendingStrategy2:        
+    def __init__(self, settings):
+        self.upper_rsi = settings['upper_rsi']
+        self.lower_rsi = settings['lower_rsi']
+        
     def decide(self, data):
         global ma5, ma10, ma20, ma50, ma100, current_rsi
 
@@ -91,6 +95,10 @@ class TrendingStrategy2:
             return "NO ACTION"
         
 class TrendingStrategy3:        
+    def __init__(self, settings):
+        self.upper_rsi = settings['upper_rsi']
+        self.lower_rsi = settings['lower_rsi']
+        
     def decide(self, data):
         global ma5, ma10, ma20, ma50, ma100, current_rsi
 
