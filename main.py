@@ -78,7 +78,7 @@ class TrendingStrategy2:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        #return "BUY"
+        return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma10 > ma20 > ma50 and market_price > ma10 and current_rsi < self.lower_rsi:
@@ -107,7 +107,7 @@ class TrendingStrategy3:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        #return "BUY"
+        return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma20 > ma50 > ma100 and market_price > ma20 and current_rsi < self.lower_rsi:
@@ -431,6 +431,8 @@ def main(general_settings, default_currency_settings, currency_pairs):
 
         # Initialize strategy objects
         trending_strategy1 = TrendingStrategy1(default_currency_settings)
+        trending_strategy2 = TrendingStrategy2(default_currency_settings)
+        trending_strategy3 = TrendingStrategy3(default_currency_settings)
         ranging_strategy1 = RangingStrategy1()
         volatile_strategy1 = VolatileStrategy1()
         low_volatility_strategy1 = LowVolatilityStrategy1()
@@ -448,7 +450,7 @@ def main(general_settings, default_currency_settings, currency_pairs):
         if strategy == "TrendingStrategy1":
             decision = trending_strategy1.decide(pair_data)
         elif strategy == "TrendingStrategy2":
-            decision = trending_strategy3.decide(pair_data)
+            decision = trending_strategy2.decide(pair_data)
         elif strategy == "TrendingStrategy3":
             decision = trending_strategy3.decide(pair_data)
         elif strategy == "RangingStrategy1":
