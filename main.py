@@ -370,7 +370,7 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
             request = orders.OrderCreate(account_id, data=order_data)
             api.request(request)
             response = request.response
-            print(f"{decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} opportunity price")
+            print(f"{decision} order placed for {pair}, quantity: {trade_quantity} units at opportunity price:{opportunity_price} with stop loss:{stop_loss_distance}  to expire {expiry_time_str} ")
         except Exception as e:
             print(f"ORDER ERROR: {decision} order placed for {pair}, quantity: {trade_quantity} units at opportunity price:{opportunity_price} with stop loss:{stop_loss_distance}  to expire {expiry_time_str} ")
             print(f"Request Order Error Occurred in execute_trade: {e}")
