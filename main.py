@@ -45,7 +45,7 @@ class TrendingStrategy1:
         #print(f"Market Price:", market_price)
 
         #DEBUG FORCE CODE
-        #return "BUY"
+        return "BUY"
         
         print("\nDEBUG 12\nUpper RSI SETTING:", self.upper_rsi )
         print("DEBUG 12b Current RSI:", current_rsi )
