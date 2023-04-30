@@ -275,10 +275,12 @@ def get_account_value():
     return
 
 # Function to execute a trade order to Oanda
-def execute_trade(pair, decision, general_settings, default_currency_settings, currency_pairs):
+def execute_trade(pair_settings, decision, general_settings, default_currency_settings, currency_pairs):
+    pair = pair_settings['name']
+    
     # Include Global Flags in this function to limit how many orders are placed for each currency pair.
     for currency_key in currency_pairs:
-        if currency_pairs[currency_key] == pair:
+        if currency_pairs[currency_key] == pair_settings:
             tagname_expiry_flag = currency_key + "_flag"
             tagname_expiry_time = currency_key + "_flag_expiry_time"
             break
@@ -288,30 +290,25 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
         print("Expiry Flag True - Order can not be placed until:",globals()[tagname_expiry_time])
         return
 
-    #Define Stop Loss Distance
-    #stop_loss_distance = 0.0005 # set this to desired number of pips
-    #take_profit_distance = 0.00025 # set this to desired number of pips 
-    stop_loss_distance = default_currency_settings['stop_loss_distance'] * pair['scaling']
-    take_profit_distance = default_currency_settings['take_profit_distance'] * pair['scaling']
+    # Define Stop Loss Distance and Take Profit Distance
+    stop_loss_distance = default_currency_settings['stop_loss_distance'] * pair_settings['scaling']
+    take_profit_distance = default_currency_settings['take_profit_distance'] * pair_settings['scaling']
 
-    #Define the opportunity to buy window
-    #buy_below_distance = 0.0000 #0.0010 set this to desired number of pips below current price for a BUY trade
-    #buy_above_distance = 0.0000 #0.0010 set this to desired number of pips above current price for a SELL trade
-    buy_below_distance = default_currency_settings['buy_below_distance'] * pair['scaling']
-    buy_above_distance = default_currency_settings['buy_above_distance'] * pair['scaling']
-    
+    # Define the opportunity to buy window
+    buy_below_distance = default_currency_settings['buy_below_distance'] * pair_settings['scaling']
+    buy_above_distance = default_currency_settings['buy_above_distance'] * pair_settings['scaling']
+
     # Calculate the trade size based on 0.5% of the total account value * margin 50:1
     account_value = get_account_value()
-    trade_value = account_value * general_settings['trade_size'] * general_settings['account_margin'] #* 0.005 * 50 
-    
+    trade_value = account_value * general_settings['trade_size'] * general_settings['account_margin']
+
     # fetch the current price of the currency pair
-    #ticker = get_historical_data(pair, granularity="S5", count=1)['candles'][0]['mid']['c']
-    ticker = get_historical_data(pair,general_settings ,granularity="S5", count=1)['candles'][0]['mid']['c']
+    ticker = get_historical_data(pair, general_settings ,granularity="S5", count=1)['candles'][0]['mid']['c']
     print(f"5S Candle Updated Price of {pair}: {ticker}")
 
     trade_quantity = math.floor(trade_value / float(ticker))
 
-    #set the price that a buy/sell will occur
+    # set the price that a buy/sell will occur
     if decision == "BUY":
          opportunity_price = round(float(ticker)  - buy_below_distance,5) # set to x pips below current price for a BUY
     elif decision == "SELL":
@@ -325,19 +322,15 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
     # Convert expiry time to AEST timezone
     tz_aest = pytz.timezone('Australia/Sydney')
     expiry_time_aest = expiry_time_utc.astimezone(tz_aest)
-    #allow_next_order_time_aest = expiry_time_utc.astimezone(tz_aest)
 
     # Format expiry time as string in the expected format
     expiry_time_str = expiry_time_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
     # Once the trade is executed, set the corresponding flag to True
     globals()[tagname_expiry_flag] = True
-    #print("Expiry Flag:", globals()[tagname_expiry_flag])
 
     # Once the trade is executed, set the corresponding flag_expiry_time
     globals()[tagname_expiry_time] = expiry_time_aest
-    #flag_expiry_time = globals()[pair + "_flag_expiry_time"]
-    #print("DEBUG 8 Flag Expiry Time:",globals()[tagname_expiry_time])
 
     # Define a function to set the flag back to False when the expiry time is reached
     def set_flag_false():
@@ -358,11 +351,7 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
                 "type": "LIMIT",
                 "gtdTime": expiry_time_str,
                 "positionFill": "DEFAULT",
-                #"trailingStopLossOnFill": {      #Pat uses stop loss on fill with MARKET, then updates the stop loss using the "trade" endpoint. Not the "order" endpoint. Pat trades 1 minute candles, and will bump up the stop loss to be 2 pips below the lowest candle in the last 15 minutes.
-                    "distance": str(stop_loss_distance),
-                #    "timeInForce": "GTC",
-                #    "type": "TRAILING_STOP_LOSS"
-                "takeProfitOnFill": {          # Add this block to set a take profit condition
+                "takeProfitOnFill": {
                      "price": str(round((opportunity_price + take_profit_distance),5)) if decision == "BUY" else str(round((opportunity_price - take_profit_distance),5)),
                      "timeInForce": "GTC" 
                 },
@@ -375,13 +364,12 @@ def execute_trade(pair, decision, general_settings, default_currency_settings, c
         }
 
         try:
-            #print(f"DEBUG 4 {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")
             request = orders.OrderCreate(account_id, data=order_data)
             api.request(request)
             response = request.response
             print(f"{decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} opportunity price")
         except Exception as e:
-            print(f"ORDER ERROR: {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")           
+            print(f"ORDER ERROR: {decision} order placed for {pair} with {trade_quantity} units at {opportunity_price} with stop loss {stop_loss_distance} opportunity price to expire {expiry_time_str} ")
             print(f"Request Order Error Occurred in execute_trade: {e}")
     else:
         print(f"Insufficient account value to place {decision} order for {pair}")
@@ -485,7 +473,8 @@ def main(general_settings, default_currency_settings, currency_pairs):
         # Call get_account_value() and execute_trade() if the decision is "BUY" or "SELL"
         if decision in ["BUY","SELL"]:
             print("Account Value:", get_account_value())
-            execute_trade(pair, decision,general_settings, default_currency_settings, currency_pairs)
+            execute_trade(currency_pairs[pair], decision, general_settings, default_currency_settings, currency_pairs)
+
 
 #if __name__ == "__main__":
 #    main()
