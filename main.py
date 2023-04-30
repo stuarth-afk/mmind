@@ -38,7 +38,7 @@ class TrendingStrategy1:
         self.lower_rsi = settings['lower_rsi']
         
     def decide(self, data):
-        global ma5, , ma10, ma20, ma50, ma100, current_rsi
+        global ma5, ma10, ma20, ma50, ma100, current_rsi
 
         # Get the current market price for the currency pair
         market_price = float(data['candles'][-1]['mid']['c'])
@@ -67,7 +67,7 @@ class TrendingStrategy1:
 
 class TrendingStrategy2:        
     def decide(self, data):
-        global ma5, , ma10, ma20, ma50, ma100, current_rsi
+        global ma5, ma10, ma20, ma50, ma100, current_rsi
 
         # Get the current market price for the currency pair
         market_price = float(data['candles'][-1]['mid']['c'])
@@ -92,7 +92,7 @@ class TrendingStrategy2:
         
 class TrendingStrategy3:        
     def decide(self, data):
-        global ma5, , ma10, ma20, ma50, ma100, current_rsi
+        global ma5, ma10, ma20, ma50, ma100, current_rsi
 
         # Get the current market price for the currency pair
         market_price = float(data['candles'][-1]['mid']['c'])
