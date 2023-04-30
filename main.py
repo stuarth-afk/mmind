@@ -276,7 +276,7 @@ def get_account_value():
 
 # Function to execute a trade order to Oanda
 def execute_trade(pair_settings, decision, general_settings, default_currency_settings, currency_pairs):
-    pair = pair_settings['name']
+    pair = pair_settings['pair']
     
     # Include Global Flags in this function to limit how many orders are placed for each currency pair.
     for currency_key in currency_pairs:
