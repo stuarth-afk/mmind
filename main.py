@@ -33,6 +33,10 @@ current_rsi = 50
 
 # Define the strategy classes
 class TrendingStrategy1:        
+    def __init__(self, settings):
+        self.upper_rsi = settings['upper_rsi']
+        self.lower_rsi = settings['lower_rsi']
+        
     def decide(self, data):
         global ma5, , ma10, ma20, ma50, ma100, current_rsi
 
@@ -430,7 +434,7 @@ def main(general_settings, default_currency_settings, currency_pairs):
         print("MA100:", ma100)
 
         # Initialize strategy objects
-        trending_strategy1 = TrendingStrategy1()
+        trending_strategy1 = TrendingStrategy1(default_currency_settings)
         ranging_strategy1 = RangingStrategy1()
         volatile_strategy1 = VolatileStrategy1()
         low_volatility_strategy1 = LowVolatilityStrategy1()
@@ -448,9 +452,9 @@ def main(general_settings, default_currency_settings, currency_pairs):
         if strategy == "TrendingStrategy1":
             decision = trending_strategy1.decide(pair_data)
         elif strategy == "TrendingStrategy2":
-            decision = trending_strategy1.decide(pair_data)
+            decision = trending_strategy3.decide(pair_data)
         elif strategy == "TrendingStrategy3":
-            decision = trending_strategy1.decide(pair_data)
+            decision = trending_strategy3.decide(pair_data)
         elif strategy == "RangingStrategy1":
             decision = ranging_strategy1.decide(pair_data)
         elif strategy == "VolatileStrategy1":
