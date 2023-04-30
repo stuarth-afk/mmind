@@ -333,35 +333,35 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
     globals()[tagname_expiry_time] = expiry_time_aest
 
     # Define a function to set the flag back to False when the expiry time is reached
-def set_flag_false():
-    globals()[tagname_expiry_flag] = False
-    globals()[tagname_expiry_time]= 0
+    def set_flag_false():
+        globals()[tagname_expiry_flag] = False
+        globals()[tagname_expiry_time]= 0
 
-# Schedule the set_flag_false function to be called after the expiry time has passed
-timer = threading.Timer((expiry_time_utc - datetime.datetime.utcnow()).total_seconds(), set_flag_false)
-timer.start()
+    # Schedule the set_flag_false function to be called after the expiry time has passed
+    timer = threading.Timer((expiry_time_utc - datetime.datetime.utcnow()).total_seconds(), set_flag_false)
+    timer.start()
 
-if trade_quantity > 0:
-    order_data = {
-        "order": {
-            "units": f"{trade_quantity}" if decision == "BUY" else f"-{trade_quantity}",
-            "price": str(round(opportunity_price, round_decimals)),
-            "instrument": pair,
-            "timeInForce": "GTD",
-            "type": "LIMIT",
-            "gtdTime": expiry_time_str,
-            "positionFill": "DEFAULT",
-            "takeProfitOnFill": {
-                 "price": str(round((opportunity_price + take_profit_distance), round_decimals)) if decision == "BUY" else str(round((opportunity_price - take_profit_distance), round_decimals)),
-                 "timeInForce": "GTC" 
-            },
-            "trailingStopLossOnFill": {
-                "distance": str(round(stop_loss_distance, round_decimals)),
-                "timeInForce": "GTC",
-                "type": "TRAILING_STOP_LOSS"
+    if trade_quantity > 0:
+        order_data = {
+            "order": {
+                "units": f"{trade_quantity}" if decision == "BUY" else f"-{trade_quantity}",
+                "price": str(round(opportunity_price, round_decimals)),
+                "instrument": pair,
+                "timeInForce": "GTD",
+                "type": "LIMIT",
+                "gtdTime": expiry_time_str,
+                "positionFill": "DEFAULT",
+                "takeProfitOnFill": {
+                     "price": str(round((opportunity_price + take_profit_distance), round_decimals)) if decision == "BUY" else str(round((opportunity_price - take_profit_distance), round_decimals)),
+                     "timeInForce": "GTC" 
+                },
+                "trailingStopLossOnFill": {
+                    "distance": str(round(stop_loss_distance, round_decimals)),
+                    "timeInForce": "GTC",
+                    "type": "TRAILING_STOP_LOSS"
+                }
             }
         }
-    }
 
 
     # Define a function to set the flag back to False when the expiry time is reached
