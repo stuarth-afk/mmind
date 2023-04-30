@@ -317,7 +317,7 @@ def execute_trade(pair_settings, decision, general_settings, default_currency_se
         opportunity_price = 0 # set to 0 for NO ACTION
 
     # Set expiry time in UTC
-    expiry_time_utc = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+    expiry_time_utc = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
 
     # Convert expiry time to AEST timezone
     tz_aest = pytz.timezone('Australia/Sydney')
