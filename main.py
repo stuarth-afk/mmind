@@ -438,9 +438,9 @@ def main(general_settings, default_currency_settings, currency_pairs):
         print("MA100:", ma100)
 
         # Initialize strategy objects
-        trending_strategy1 = TrendingStrategy1(default_currency_settings, lower_rsi, upper_rsi)
-        trending_strategy2 = TrendingStrategy2(default_currency_settings, lower_rsi, upper_rsi)
-        trending_strategy3 = TrendingStrategy3(default_currency_settings, lower_rsi, upper_rsi)
+        trending_strategy1 = TrendingStrategy1(default_currency_settings)
+        trending_strategy2 = TrendingStrategy2(default_currency_settings)
+        trending_strategy3 = TrendingStrategy3(default_currency_settings)
         ranging_strategy1 = RangingStrategy1()
         volatile_strategy1 = VolatileStrategy1()
         low_volatility_strategy1 = LowVolatilityStrategy1()
@@ -456,11 +456,11 @@ def main(general_settings, default_currency_settings, currency_pairs):
 
         # Execute the selected strategy
         if strategy == "TrendingStrategy1":
-            decision = trending_strategy1.decide(pair_data)
+            decision = trending_strategy1.decide(pair_data, lower_rsi, upper_rsi)
         elif strategy == "TrendingStrategy2":
-            decision = trending_strategy2.decide(pair_data)
+            decision = trending_strategy2.decide(pair_data, lower_rsi, upper_rsi)
         elif strategy == "TrendingStrategy3":
-            decision = trending_strategy3.decide(pair_data)
+            decision = trending_strategy3.decide(pair_data, lower_rsi, upper_rsi)
         elif strategy == "RangingStrategy1":
             decision = ranging_strategy1.decide(pair_data)
         elif strategy == "VolatileStrategy1":
