@@ -425,7 +425,12 @@ def main(general_settings, default_currency_settings, currency_pairs):
         # Print the DataFrame with the calculated moving averages
         #print(moving_avg_data)
 
+        
+        # Get the strategy and RSI values from the current currency pair
         strategy = select_strategy(pair, pair_data)
+        #strategy = currency_pairs[pair]['strategy']
+        lower_rsi = currency_pairs[pair]['lower_rsi']
+        upper_rsi = currency_pairs[pair]['upper_rsi']
 
         # Print Values to Command Line
         print(f"\n{pair} Current Price:", current_price)
@@ -436,7 +441,9 @@ def main(general_settings, default_currency_settings, currency_pairs):
         print("MA20 :", ma20)
         print("MA50 :", ma50)
         print("MA100:", ma100)
-
+        print("{pair} lower_rsi_limit:",lower_rsi)
+        print("{pair} upper_rsi_limit:",upper_rsi)
+        
         # Initialize strategy objects
         trending_strategy1 = TrendingStrategy1(default_currency_settings)
         trending_strategy2 = TrendingStrategy2(default_currency_settings)
