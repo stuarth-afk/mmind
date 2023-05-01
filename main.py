@@ -110,7 +110,7 @@ class TrendingStrategy3:
         #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
-        if ma20 > ma50 > ma100 and market_price > ma20 and  and current_rsi > 30 and current_rsi < self.lower_rsi :
+        if ma20 > ma50 > ma100 and market_price > ma20 and current_rsi > 30 and current_rsi < self.lower_rsi :
             # The market is trending up and the current price is above the 20-candle moving average and RSI is ok, so execute a "BUY"
             print("BUY")
             return "BUY"
