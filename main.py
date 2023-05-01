@@ -37,7 +37,7 @@ class TrendingStrategy1:
         self.upper_rsi = settings['upper_rsi']
         self.lower_rsi = settings['lower_rsi']
         
-    def decide(self, data):
+    def decide(self, data, rsi_lower_max, rsi_upper_min):
         global ma5, ma10, ma20, ma50, ma100, current_rsi
 
         # Get the current market price for the currency pair
@@ -47,16 +47,20 @@ class TrendingStrategy1:
         #DEBUG FORCE CODE
         #return "BUY"
         
+        print("Lower RSI SETTING:", self.lower_rsi, )
+        print("Current RSI (BUY):", current_rsi )
+        print("Pair rsi_lower_max(31...100):", rsi_lower_max, "\n")
+        print("Pair rsi_upper_min(0...69):", rsi_lower_max, "\n")
+        print("Current RSI (SELL):", current_rsi )
         print("Upper RSI SETTING:", self.upper_rsi )
-        print("Current RSI:", current_rsi )
-        print("Lower RSI SETTING:", self.lower_rsi,"\n" )   
+           
             
         # Determine whether the market is trending up or down based on the moving averages 
-        if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi > 30 and current_rsi < self.lower_rsi :
+        if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi > self.lower_rsi and current_rsi < rsi_lower_max  :
             # The market is trending up and the current price is above the 5-candle moving average and the RSI is above oversold level(30) and below individual pair lower setting, so execute a "BUY"
             print("BUY")
             return "BUY"
-        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < 70 and current_rsi < self.upper_rsi :
+        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < self.upper_rsi and current_rsi >  rsi_upper_min :
             # The market is trending down and the current price is below the 5-candle moving average and the RSI is below the overbought level(70) and above individual pair upper setting, so execute a "SELL"
             print("SELL")
             return "SELL"
@@ -81,11 +85,11 @@ class TrendingStrategy2:
         #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
-        if ma10 > ma20 > ma50 and market_price > ma10  and current_rsi > 30 and current_rsi < self.lower_rsi :
+        if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi > self.lower_rsi and current_rsi < rsi_lower_max  :
             # The market is trending up and the current price is above the 5-candle moving average and RSI is ok, so execute a "BUY"
             print("BUY")
             return "BUY"
-        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < 70 and current_rsi < self.upper_rsi :
+        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < self.upper_rsi and current_rsi >  rsi_upper_min :
             # The market is trending down and the current price is below the 5-candle moving average and RSI is ok, so execute a "SELL"
             print("SELL")
             return "SELL"
@@ -110,11 +114,11 @@ class TrendingStrategy3:
         #return "BUY"
 
         # Determine whether the market is trending up or down based on the moving averages
-        if ma20 > ma50 > ma100 and market_price > ma20 and current_rsi > 30 and current_rsi < self.lower_rsi :
+        if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi > self.lower_rsi and current_rsi < rsi_lower_max  :
             # The market is trending up and the current price is above the 20-candle moving average and RSI is ok, so execute a "BUY"
             print("BUY")
             return "BUY"
-        elif ma20 < ma50 < ma100 and market_price < ma20 and current_rsi < 70 and current_rsi < self.upper_rsi :
+        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < self.upper_rsi and current_rsi >  rsi_upper_min :
             # The market is trending down and the current price is below the 20-candle moving average and RSI is ok, so execute a "SELL"
             print("SELL")
             return "SELL"
@@ -434,9 +438,9 @@ def main(general_settings, default_currency_settings, currency_pairs):
         print("MA100:", ma100)
 
         # Initialize strategy objects
-        trending_strategy1 = TrendingStrategy1(default_currency_settings)
-        trending_strategy2 = TrendingStrategy2(default_currency_settings)
-        trending_strategy3 = TrendingStrategy3(default_currency_settings)
+        trending_strategy1 = TrendingStrategy1(default_currency_settings, lower_rsi, upper_rsi)
+        trending_strategy2 = TrendingStrategy2(default_currency_settings, lower_rsi, upper_rsi)
+        trending_strategy3 = TrendingStrategy3(default_currency_settings, lower_rsi, upper_rsi)
         ranging_strategy1 = RangingStrategy1()
         volatile_strategy1 = VolatileStrategy1()
         low_volatility_strategy1 = LowVolatilityStrategy1()
@@ -535,7 +539,9 @@ while True:
             currency_pairs[section] = {
                 'pair': config.get(section, 'pair'),
                 'scaling': float(config.get(section, 'scaling')),
-                'strategy': config.get(section, 'strategy')
+                'strategy': config.get(section, 'strategy'),
+                'lower_rsi': float(config.get(section, 'lower_rsi')),
+                'upper_rsi': float(config.get(section, 'upper_rsi'))
             }
 
     # Create global flag variables for each currency pair
