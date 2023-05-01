@@ -57,8 +57,7 @@ class TrendingStrategy1:
             print("BUY")
             return "BUY"
         elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < 70 and current_rsi < self.upper_rsi :
-            # The market is trending down and the current price is below the 5-candle moving average and the RSI is below the overbought level(70) and above individual pair upper setting, so execute a "BUY"
-            print("BUY"), so execute a "SELL"
+            # The market is trending down and the current price is below the 5-candle moving average and the RSI is below the overbought level(70) and above individual pair upper setting, so execute a "SELL"
             print("SELL")
             return "SELL"
         else:
@@ -83,11 +82,11 @@ class TrendingStrategy2:
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma10 > ma20 > ma50 and market_price > ma10  and current_rsi > 30 and current_rsi < self.lower_rsi :
-            # The market is trending up and the current price is above the 5-candle moving average, so execute a "BUY"
+            # The market is trending up and the current price is above the 5-candle moving average and RSI is ok, so execute a "BUY"
             print("BUY")
             return "BUY"
         elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < 70 and current_rsi < self.upper_rsi :
-            # The market is trending down and the current price is below the 5-candle moving average, so execute a "SELL"
+            # The market is trending down and the current price is below the 5-candle moving average and RSI is ok, so execute a "SELL"
             print("SELL")
             return "SELL"
         else:
@@ -112,11 +111,11 @@ class TrendingStrategy3:
 
         # Determine whether the market is trending up or down based on the moving averages
         if ma20 > ma50 > ma100 and market_price > ma20 and  and current_rsi > 30 and current_rsi < self.lower_rsi :
-            # The market is trending up and the current price is above the 20-candle moving average, so execute a "BUY"
+            # The market is trending up and the current price is above the 20-candle moving average and RSI is ok, so execute a "BUY"
             print("BUY")
             return "BUY"
         elif ma20 < ma50 < ma100 and market_price < ma20 and current_rsi < 70 and current_rsi < self.upper_rsi :
-            # The market is trending down and the current price is below the 20-candle moving average, so execute a "SELL"
+            # The market is trending down and the current price is below the 20-candle moving average and RSI is ok, so execute a "SELL"
             print("SELL")
             return "SELL"
         else:
