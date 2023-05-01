@@ -56,11 +56,11 @@ class TrendingStrategy1:
            
             
         # Determine whether the market is trending up or down based on the moving averages 
-        if ma5 > ma20 > ma50 and market_price > ma5 and current_rsi > self.lower_rsi and current_rsi < rsi_lower_max  :
+        if ma5 > ma20 > ma50 > ma100 and market_price > ma5 and current_rsi > self.lower_rsi and current_rsi < rsi_lower_max  :
             # The market is trending up and the current price is above the 5-candle moving average and the RSI is above oversold level(30) and below individual pair lower setting, so execute a "BUY"
             print("BUY")
             return "BUY"
-        elif ma5 < ma20 < ma50 and market_price < ma5 and current_rsi < self.upper_rsi and current_rsi >  rsi_upper_min :
+        elif ma5 < ma20 < ma50 < ma100 and market_price < ma5 and current_rsi < self.upper_rsi and current_rsi >  rsi_upper_min :
             # The market is trending down and the current price is below the 5-candle moving average and the RSI is below the overbought level(70) and above individual pair upper setting, so execute a "SELL"
             print("SELL")
             return "SELL"
