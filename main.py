@@ -50,7 +50,7 @@ class TrendingStrategy1:
         print("Lower RSI SETTING:", self.lower_rsi, )
         print("Current RSI (BUY):", current_rsi )
         print("Pair rsi_lower_max(31...100):", rsi_lower_max, "\n")
-        print("Pair rsi_upper_min(0...69):", rsi_upper_min, "\n")
+        print("Pair rsi_upper_min(0...69):", rsi_upper_min,)
         print("Current RSI (SELL):", current_rsi )
         print("Upper RSI SETTING:", self.upper_rsi )
            
